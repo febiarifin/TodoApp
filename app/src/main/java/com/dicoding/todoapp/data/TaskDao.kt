@@ -23,10 +23,10 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE completed = 0 ORDER BY dueDate ASC LIMIT 1")
     fun getNearestActiveTask(): Task
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE, entity = Task::class)
     suspend fun insertTask(task: Task): Long
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE, entity = Task::class)
     fun insertAll(vararg tasks: Task)
 
     @Delete

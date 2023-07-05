@@ -56,18 +56,23 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.DialogDateListen
                 //TODO 12 : Create AddTaskViewModel and insert new task to database
                 val addEdTitle: EditText = findViewById(R.id.add_ed_title)
                 val addEdDescription: EditText = findViewById(R.id.add_ed_description)
+                val addTvDueDate: TextView = findViewById(R.id.add_tv_due_date)
 
                 var title = addEdTitle.text.toString()
                 var description = addEdDescription.text.toString()
+                var dueDate = addTvDueDate.text.toString()
 
-                if (title.isNotEmpty() && description.isNotEmpty() ) {
-                    addTaskViewModel.insertNewTask(Task(title = title, description = description, dueDateMillis = dueDateMillis, isCompleted = false))
-                }else if (title.isEmpty() && description.isEmpty()) {
+                if (title.isNotEmpty() && description.isNotEmpty() && dueDate != "Due date") {
+                    val newTask = Task(0,title, description, dueDateMillis, false)
+                    addTaskViewModel.insertNewTask(newTask)
+                }else if (title.isEmpty() && description.isEmpty() && dueDate == "Due date") {
                     Toast.makeText(this, "All fields must be filled", Toast.LENGTH_SHORT).show()
                 } else if (title.isEmpty()) {
                     addEdTitle.setError("Title can't be empty")
                 } else if (description.isEmpty()) {
                     addEdDescription.setError("Description can't be empty")
+                } else if(dueDate == "Due date"){
+                    addTvDueDate.setError("Haven't set a date yet")
                 }
                 true
             }
