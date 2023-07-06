@@ -6,11 +6,14 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import androidx.work.Data
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequest
+import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.dicoding.todoapp.R
 import com.dicoding.todoapp.notification.NotificationWorker
 import com.dicoding.todoapp.utils.NOTIFICATION_CHANNEL_ID
+import java.util.concurrent.TimeUnit
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -29,18 +32,29 @@ class SettingsActivity : AppCompatActivity() {
     class SettingsFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
-
             val prefNotification = findPreference<SwitchPreference>(getString(R.string.pref_key_notify))
+
             prefNotification?.setOnPreferenceChangeListener { preference, newValue ->
                 val channelName = getString(R.string.notify_channel_name)
+
                 //TODO 13 : Schedule and cancel daily reminder using WorkManager with data channelName
                 val workManager = WorkManager.getInstance(requireContext())
                 val value = newValue as Boolean
-                lateinit var oneTimeWorkRequest: OneTimeWorkRequest
-                if (value){
-                    val data = Data.Builder().putString(NOTIFICATION_CHANNEL_ID,channelName).build()
-                    oneTimeWorkRequest = OneTimeWorkRequest.Builder(NotificationWorker::class.java).setInputData(data).build()
-                    workManager.enqueue(oneTimeWorkRequest)
+                lateinit var periodicWorkRequest: PeriodicWorkRequest
+                if (value) {
+                    val data = Data.Builder().putString(NOTIFICATION_CHANNEL_ID, channelName).build()
+
+                    periodicWorkRequest = PeriodicWorkRequest.Builder(
+                        NotificationWorker::class.java,
+                        24,
+                        TimeUnit.HOURS
+                    ).setInputData(data).build()
+
+                    workManager.enqueueUniquePeriodicWork(
+                        "NotificationWork",
+                        ExistingPeriodicWorkPolicy.REPLACE,
+                        periodicWorkRequest
+                    )
                 }
                 true
             }
